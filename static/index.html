@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chatbot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="bar">
+    <span class="dot" id="status" title="checking connection"></span>
+    <h1>Chatbot</h1>
+    <button id="reset" type="button">Clear chat</button>
+  </header>
+
+  <main id="thread" class="thread" aria-live="polite">
+    <p class="empty">Ask anything to start. Your conversation stays in this browser tab.</p>
+  </main>
+
+  <form class="composer" id="composer">
+    <label class="sr-only" for="input">Your message</label>
+    <textarea id="input" rows="1" placeholder="Type a message…" autocomplete="off"></textarea>
+    <button id="send" type="submit">Send</button>
+  </form>
+
+  <script src="/app.js"></script>
+</body>
+</html>
