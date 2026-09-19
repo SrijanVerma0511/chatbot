@@ -1,47 +1,61 @@
-<<<<<<< HEAD
-# AI_Chatbot
-An AI-powered chatbot designed to provide intelligent, real-time, and conversational responses using modern AI technologies.
-=======
-# AI Chatbot MVP
+# 🤖 AI Chatbot
 
-FastAPI + OpenAI backend with a streaming vanilla JS front end.
+A simple and lightweight AI chatbot built with **FastAPI, OpenAI API, HTML, CSS, and JavaScript**.
 
-## Run it
+The chatbot allows users to send messages and receive AI-generated responses through a clean web interface with real-time response streaming.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+> 🔐 **Important:** This project requires an OpenAI API key. Each user must use their own API key. Never share or commit your API key to GitHub.
 
-cp .env.example .env             # then paste your real key into .env
-python app.py
-```
+---
 
-Open http://127.0.0.1:8000
+## ✨ Features
 
-## Files
+- 💬 AI-powered conversations
+- ⚡ Real-time streaming responses
+- 🧠 OpenAI API integration
+- 🚀 FastAPI backend
+- 🌐 HTML, CSS and JavaScript frontend
+- 📱 Responsive chat interface
+- 🔐 Secure API-key configuration using `.env`
+- 🩺 Health-check endpoint
+- 🛠️ Simple and beginner-friendly project structure
 
-| File | Job |
-|---|---|
-| `app.py` | `/api/chat` streams tokens over SSE, `/api/health` reports status, serves `static/` |
-| `static/index.html` | Markup |
-| `static/style.css` | Styling |
-| `static/app.js` | Sends history, reads the stream, renders tokens live |
+---
 
-## How a turn works
+## 🛠️ Tech Stack
 
-1. JS posts the whole conversation array to `/api/chat`.
-2. `app.py` prepends the system prompt, trims to the last 20 turns, calls OpenAI with `stream=True`.
-3. Each token is pushed as `data: {"token": "..."}` and appended to the bubble as it arrives.
-4. `data: [DONE]` closes the stream.
+### Backend
+- Python
+- FastAPI
+- OpenAI Python SDK
+- Uvicorn
+- python-dotenv
 
-State lives in browser memory, so a refresh clears it.
+### Frontend
+- HTML5
+- CSS3
+- JavaScript
 
-## Next steps
+### Communication
+- REST API
+- Server-Sent Events (SSE)
 
-- Persist chats in SQLite (`conversations` and `messages` tables keyed by session id).
-- Rate-limit `/api/chat` by IP with `slowapi` before exposing it publicly.
-- Render Markdown in replies with `marked` + `DOMPurify`.
-- Add retrieval: embed your docs, search on each turn, prepend hits to the system prompt.
-- For deployment, run `uvicorn app:app --host 0.0.0.0` behind nginx with `proxy_buffering off` so streaming survives.
->>>>>>> 6679173 (feat: add AI chatbot application)
+---
+
+## 📁 Project Structure
+
+```text
+chatbot/
+│
+├── static/
+│   ├── index.html       # Chatbot interface
+│   ├── style.css        # Frontend styling
+│   └── app.js           # Frontend JavaScript
+│
+├── app.py               # FastAPI backend
+├── test_api.py          # OpenAI API test
+├── testapp.py           # Application testing
+├── requirements.txt     # Python dependencies
+├── .gitignore           # Git ignored files
+├── .env.example         # Environment variable template
+└── README.md            # Project documentation
