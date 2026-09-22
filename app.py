@@ -1,4 +1,4 @@
-"""Minimal AI chatbot backend: FastAPI + OpenAI, streamed over SSE."""
+"""Minimal AI chatbot backend: FastAPI + Google Gemini, streamed over SSE."""
 
 import json
 import os
@@ -7,22 +7,24 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI, OpenAIError
+from google import genai
+from google.genai import types
+from google.genai.errors import APIError
 from pydantic import BaseModel, Field
 
 
 # Load .env file
 load_dotenv(override=True)
 
-# Get API key
-key = os.getenv("OPENAI_API_KEY")
+# Get Gemini API key
+key = os.getenv("GEMINI_API_KEY")
 
-print("API KEY LOADED:", bool(key))
-print("API KEY PREFIX:", key[:7] if key else "NONE")
-print("API KEY LENGTH:", len(key) if key else 0)
+print("GEMINI API KEY LOADED:", bool(key))
+print("GEMINI API KEY PREFIX:", key[:7] if key else "NONE")
+print("GEMINI API KEY LENGTH:", len(key) if key else 0)
 
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 SYSTEM_PROMPT = (
     "You are a helpful assistant. Answer clearly and concisely. "
@@ -32,8 +34,8 @@ SYSTEM_PROMPT = (
 MAX_TURNS = 20
 
 
-# OpenAI client
-client = OpenAI(api_key=key)
+# Gemini client
+client = genai.Client(api_key=key) if key else None
 
 app = FastAPI(title="Chatbot MVP")
 
@@ -49,32 +51,41 @@ class ChatRequest(BaseModel):
 
 def stream_completion(messages: list[Message]):
     """Yield server-sent events as tokens arrive from the model."""
+    if not client:
+        yield f"data: {json.dumps({'error': 'Gemini client is not initialized. Please set GEMINI_API_KEY in .env.'})}\n\n"
+        yield "data: [DONE]\n\n"
+        return
 
-    payload = [
-        {
-            "role": "system",
-            "content": SYSTEM_PROMPT
-        }
-    ]
-
-    payload += [m.model_dump() for m in messages[-MAX_TURNS:]]
-
-    try:
-        stream = client.chat.completions.create(
-            model=MODEL,
-            messages=payload,
-            temperature=0.7,
-            stream=True,
+    # Convert conversation turns for Gemini (assistant -> model)
+    contents = []
+    for m in messages[-MAX_TURNS:]:
+        gemini_role = "user" if m.role == "user" else "model"
+        contents.append(
+            types.Content(
+                role=gemini_role,
+                parts=[types.Part.from_text(text=m.content)],
+            )
         )
 
-        for chunk in stream:
-            token = chunk.choices[0].delta.content
+    config = types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        temperature=0.7,
+    )
 
+    try:
+        response = client.models.generate_content_stream(
+            model=MODEL,
+            contents=contents,
+            config=config,
+        )
+
+        for chunk in response:
+            token = chunk.text
             if token:
                 yield f"data: {json.dumps({'token': token})}\n\n"
 
-    except OpenAIError as exc:
-        print("OPENAI ERROR:", exc)
+    except APIError as exc:
+        print("GEMINI API ERROR:", exc)
         yield f"data: {json.dumps({'error': str(exc)})}\n\n"
 
     except Exception as exc:
@@ -90,7 +101,7 @@ def chat(req: ChatRequest):
     if not key:
         raise HTTPException(
             500,
-            "OPENAI_API_KEY is not set. Add it to your .env file."
+            "GEMINI_API_KEY is not set. Add it to your .env file."
         )
 
     return StreamingResponse(
@@ -107,7 +118,9 @@ def chat(req: ChatRequest):
 def health():
     return {
         "status": "ok",
-        "model": MODEL
+        "provider": "gemini",
+        "model": MODEL,
+        "api_key_configured": bool(key),
     }
 
 
