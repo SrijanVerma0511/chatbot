@@ -1,8 +1,69 @@
-# AI Chatbot (Google Gemini)
+# 🤖 AI Chatbot
 
-An AI-powered chatbot designed to provide intelligent, real-time, and conversational responses powered by **Google Gemini** and **FastAPI**, streamed over SSE to a clean vanilla JS frontend.
+A simple and lightweight AI chatbot built with **FastAPI, Google Gemini API, HTML, CSS, and JavaScript**.
 
-## Run it
+The chatbot allows users to send messages and receive AI-generated responses through a clean web interface with real-time response streaming.
+
+> 🔐 **Important:** This project requires a Google Gemini API key. Each user must use their own API key. Never share or commit your API key to GitHub.
+
+---
+
+## ✨ Features
+
+- 💬 AI-powered conversations
+- ⚡ Real-time streaming responses
+- 🧠 Google Gemini API integration (`gemini-2.5-flash`)
+- 🚀 FastAPI backend
+- 🌐 HTML, CSS and JavaScript frontend
+- 📱 Responsive chat interface
+- 🔐 Secure API-key configuration using `.env`
+- 🩺 Health-check endpoint (`/api/health`)
+- 🛠️ Simple and clean project structure
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- Python
+- FastAPI
+- Google GenAI SDK (`google-genai`)
+- Uvicorn
+- python-dotenv
+
+### Frontend
+- HTML5
+- CSS3
+- JavaScript (Vanilla)
+
+### Communication
+- REST API
+- Server-Sent Events (SSE)
+
+---
+
+## 📁 Project Structure
+
+```text
+chatbot/
+│
+├── static/
+│   ├── index.html       # Chatbot interface
+│   ├── style.css        # Frontend styling
+│   └── app.js           # Frontend JavaScript
+│
+├── app.py               # FastAPI backend with Gemini SSE streaming
+├── test_api.py          # Gemini API test script
+├── testapp.py           # Application testing
+├── requirements.txt     # Python dependencies
+├── .gitignore           # Git ignored files
+├── .env.example         # Environment variable template
+└── README.md            # Project documentation
+```
+
+---
+
+## 🚀 Run It
 
 ```bash
 python3 -m venv .venv
@@ -15,7 +76,9 @@ python app.py
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
-## Environment Variables
+---
+
+## ⚙️ Environment Variables
 
 In `.env`:
 ```env
@@ -23,19 +86,11 @@ GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
-## Files
+---
 
-| File | Job |
-|---|---|
-| `app.py` | `/api/chat` streams Gemini tokens over SSE, `/api/health` reports status, serves `static/` |
-| `test_api.py` | Quick CLI verification of Gemini API connection and model response |
-| `static/index.html` | Chat UI markup |
-| `static/style.css` | Styling |
-| `static/app.js` | Sends message history, parses token stream, renders bubbles live |
+## 🔄 How a Turn Works
 
-## How a turn works
-
-1. JS posts the conversation array to `/api/chat`.
-2. `app.py` formats the history for Gemini (`assistant` -> `model`), attaches system instructions, and calls `client.models.generate_content_stream()`.
-3. Each token is yielded as `data: {"token": "..."}` and rendered into the message bubble in real-time.
-4. `data: [DONE]` signals stream completion.
+1. **Frontend**: JS posts the conversation history array to `/api/chat`.
+2. **Backend**: `app.py` formats the history for Gemini (`assistant` -> `model`), attaches system instructions, and calls `client.models.generate_content_stream()`.
+3. **Streaming**: Each token chunk is yielded over Server-Sent Events as `data: {"token": "..."}` and rendered into the message bubble in real-time.
+4. **Completion**: `data: [DONE]` signals stream completion and finishes the bubble.
